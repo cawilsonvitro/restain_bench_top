@@ -5,7 +5,7 @@ import datetime as dt
 from seabreeze.spectrometers import list_devices, Spectrometer
 
 class oceanoptic_controller():
-    def __init__(self, init_time = 100000, model = 'USB2000PLUS'):
+    def __init__(self, integration = 100000, model = 'HR2000PLUS'):
         '''
         init the class 
 
@@ -19,7 +19,7 @@ class oceanoptic_controller():
         --------
         None
         '''
-        self.inittime = init_time
+        self.integration_time = integration
         self.model = model
         self.status = False
         self.wl = []
@@ -42,19 +42,19 @@ class oceanoptic_controller():
         if len(devices) == 0:
             self.status = False
         else:
-            self.spec = Spectrometer.from_first_available()
-            self.spec.integration_time_micros(self.inittime)
-            self.status = True
-        #     i = 0
-        #     for device in devices:
-        #         if device.model == self.model:
-        #             break
-        #         i += 1
+            # self.spec = Spectrometer.from_first_available()
+            # self.spec.integration_time_micros(self.integration_time)
+            # self.status = True
+            i = 0
+            for device in devices:
+                if device.model == self.model:
+                    break
+                i += 1
             
      
-        #     self.spec = Spectrometer.from_serial_number(devices[i].serial_number)
-        #     self.spec.integration_time_micros(self.inittime)
-        #     self.status = True            
+            self.spec = Spectrometer.from_serial_number(devices[i].serial_number)
+            self.spec.integration_time_micros(self.integration_time)
+            self.status = True            
         return 
 
 
@@ -68,16 +68,16 @@ class oceanoptic_controller():
             self.intens = self.spec.intensities()
 
 
-            plt.title(" reflection")
-            plt.plot(self.wl, self.intens)
-            plt.xlabel("Wavelength [nm]")
-            plt.ylabel("Intensity [a.u.]")
-            plt.grid(True)
-            plt.show()
+            # plt.title(" reflection")
+            # plt.plot(self.wl, self.intens)
+            # plt.xlabel("Wavelength [nm]")
+            # plt.ylabel("Intensity [a.u.]")
+            # plt.grid(True)
+            # plt.show()
 
-# test = oceanoptic_controller(init_time = 212000,model='HR2000PLUS')
+# test = oceanoptic_controller(integration = 212000,model='HR2000PLUS')
 
 
 # test.init_spec()
 
-# test.get_spectra()
+# # test.get_spectra()

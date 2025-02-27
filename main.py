@@ -3,8 +3,10 @@ from tkinter import Misc
 import tkinter.ttk as ttk
 from spec_controller import *
 from gui import *
-
-
+import json
+import os
+import time 
+import numpy as np
 
 class resistain_app:
 
@@ -13,11 +15,30 @@ class resistain_app:
         '''
         intit. class for use
         '''
-        self.spec = oceanoptic_controller(init_time = 212000,model='HR2000PLUS')
         self.quit = False
+        self.process_display = None
+
+        #spectometer
+        self.spectrometer = None
+        self.integration_time = None
+        self.model = None
+
+        #dark sample
         self.dark_wl = None
         self.dark_intens = None
-        self.process_display = None
+
+        #light sample
+        self.light_wl = None
+        self.light_intens = None
+
+        #config storage
+        self.config = None
+        self.spec_config = None
+
+        #avgs 
+        self.light_avg = None
+        self.dark_avg = None
+        self.boxcar = None
 
     def startApp(self):
         '''
@@ -60,7 +81,17 @@ class resistain_app:
             image = TkImage("Dark_Sample", r"images/Dark_Sample.jpg").image,
             command = self.take_dark,
         ).place(x = 30,y = 25)
-        
+
+        StandardButtons(
+            "Light_Sample",
+            root,
+            image = TkImage("Ligh_Sample", r"images/Light_Sample.png").image,
+            command = self.take_light,
+        ).place(x = 30,y = 85)
+
+
+
+
         Label(
             "Process_Status", 
             root,
@@ -73,8 +104,8 @@ class resistain_app:
             cursor="hand2",   
             fg="black",                           
             justify = tk.LEFT,  
-            wraplength=250   
-            ).place(x = 300, y = 340, width = 180,height = 40)
+            wraplength=100   
+            ).place(x = 300, y = 200, width = 180,height = 200)
         
         StandardLabel(
             "Dark_Room_Status",
@@ -83,23 +114,80 @@ class resistain_app:
                     ).place(x = 150, y = 20)
         
 
-        self.process_display.set("awaiting command")
+        self.process_display.set("GUI built, initalizing Spectrometer")
+        self.load_spec()
 
+
+
+    #endregion
+
+    #region spectro init
+    def load_spec(self):
+        self.process_display.set("loading Config")
+        if not os.path.isfile('config.json'): #checking if file exists if not making one
+            self.process_display.set("Config not found creating Default Config")
+            default_spec = {
+                "Spectrometer": {
+                "integrationtime": "100000",
+                "model": "HR2000PLUS",
+                "darkAvgs": "10",
+                "lightAvgs": "10",
+                "BoxCar": "5"  
+                                }
+                        }
+            with open('config.json','w+') as f:
+                json.dump(default_spec, f)#if file not found creates file with default configs
+        with open('config.json') as f:
+            self.config = json.load(f)
+            self.spec_config = self.config["Spectrometer"]
+        
+        self.process_display.set("Config loaded Initalizing Spectrometer")
+
+        self.model = self.spec_config["model"]
+        self.integration_time = int(self.spec_config["integrationtime"])
+        self.dark_avg = int(self.spec_config["darkAvgs"])
+        self.light_avg = int(self.spec_config["lightAvgs"])
+        self.boxcar = int(self.spec_config["BoxCar"])
+
+
+        try:
+            self.spectrometer = oceanoptic_controller(self.integration_time, self.model)
+            self.spectrometer.init_spec()
+            self.process_display.set("Spectrometer Ready")
+        except Exception as e:
+            error = "failed: " + str(e)
+            self.process_display.set(error)
+            
+
+
+
+    
     #endregion
 
     #region Spectro usage
 
 
-    
+
     def take_dark(self):
         '''
         takes dark sample to normalize against
         '''
-        print(" I have taken dark")
         self.process_display.set("taking dark room sample")
 
         try:
+            i = 0 
+
+            dark_temp = 0
+            self.dark_intens = 0
+            while i < self.dark_avg:
+                self.spectrometer.get_spectra()
+                self.dark_wl = self.spectrometer.wl
+                dark_temp = self.spectrometer.intens
+                np.add(self.dark_intens,dark_temp)
+                i += 1
             
+            self.dark_intens_avg = self.dark_intens/self.dark_avg
+            self.dark_intens_avg = np.convolve(self.dark_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
 
 
 
@@ -122,10 +210,23 @@ class resistain_app:
             
             self.process_display.set(e)
         
+    def take_light(self):
+        '''
+        takes light sample
+        '''
 
+        if 
+
+        self.process_display.set("taking light sample")
+        print("taken light")
 
     #endregion
 
+    #region Data handling
+
+    
+
+    #endregion
 
 if __name__ == "__main__":
     temp = resistain_app()
