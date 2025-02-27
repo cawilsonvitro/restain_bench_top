@@ -26,6 +26,7 @@ class resistain_app:
         #dark sample
         self.dark_wl = None
         self.dark_intens = None
+        self.dark = False
 
         #light sample
         self.light_wl = None
@@ -173,17 +174,17 @@ class resistain_app:
         takes dark sample to normalize against
         '''
         self.process_display.set("taking dark room sample")
-
+        self.root.update_idletasks()
+        self.dark = False
         try:
             i = 0 
-
             dark_temp = 0
             self.dark_intens = 0
             while i < self.dark_avg:
                 self.spectrometer.get_spectra()
                 self.dark_wl = self.spectrometer.wl
                 dark_temp = self.spectrometer.intens
-                np.add(self.dark_intens,dark_temp)
+                np.add(self.dark_intens, dark_temp)
                 i += 1
             
             self.dark_intens_avg = self.dark_intens/self.dark_avg
@@ -198,6 +199,7 @@ class resistain_app:
                     ).place(x = 150, y = 20)
             
             self.process_display.set("dark sample completed")
+            self.dark = True
 
         except Exception as e:
             
@@ -215,10 +217,31 @@ class resistain_app:
         takes light sample
         '''
 
-        if 
+        if not self.dark:
+            self.process_display.set(" Please take dark sample first")
+        else:
+            self.process_display.set("taking light sample")
+            self.root.update_idletasks()
+            
+            try:
+                i = 0
+                light_temp = 0
+                self.dark_intens = 0
+                while i < self.light_avg:
+                    self.spectrometer.get_spectra()
+                    self.light_wl = self.spectrometer.wl
+                    light_temp = self.spectrometer.intens
+                    np.add(self.dark_intens, light_temp)
+                    i += 1
+                
+                self.light_intens_avg = self.light_avg/self.light_avg
+                self.light_intens_avg = np.convolve(self.light_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
 
-        self.process_display.set("taking light sample")
-        print("taken light")
+                self.process_display.set("Light Sample taken")
+
+            except Exception as e:
+                self.process_display.set(e)
+            
 
     #endregion
 
