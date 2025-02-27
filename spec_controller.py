@@ -19,8 +19,6 @@ class oceanoptic_controller():
         --------
         None
         '''
-        self.data_path = "data_output"
-        self.scan_folder = ""
         self.inittime = init_time
         self.model = model
         self.status = False
@@ -77,9 +75,9 @@ class oceanoptic_controller():
             plt.grid(True)
             plt.show()
 
-test = oceanoptic_controller(init_time = 212000,model='HR2000PLUS')
+# test = oceanoptic_controller(init_time = 212000,model='HR2000PLUS')
 
 
-test.init_spec()
+# test.init_spec()
 
-test.get_spectra()
+# test.get_spectra()
