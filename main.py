@@ -215,7 +215,7 @@ class resistain_app:
         takes light sample
         '''
 
-        if 
+        #if 
 
         self.process_display.set("taking light sample")
         print("taken light")
