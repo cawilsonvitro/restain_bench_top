@@ -7,6 +7,7 @@ import json
 import os
 import time 
 import numpy as np
+import csv
 
 class resistain_app:
 
@@ -43,6 +44,7 @@ class resistain_app:
         #data management
         self.startPt = None
         self.stopPt = None
+        self.dataPath = r"data/"
 
     def startApp(self):
         '''
@@ -91,15 +93,22 @@ class resistain_app:
             "Dark_Sample",
             root,
             image = TkImage("Dark_Sample", r"images/Dark_Sample.jpg").image,
-            command = self.take_dark,
+            command = self.take_dark
         ).place(x = 30,y = 25)
 
         StandardButtons(
             "Light_Sample",
             root,
-            image = TkImage("Ligh_Sample", r"images/Light_Sample.png").image,
-            command = self.take_light,
+            image = TkImage("Light_Sample", r"images/Light_Sample.png").image,
+            command = self.take_light
         ).place(x = 30,y = 85)
+        
+        StandardButtons(
+            "Save",
+            root,
+            image = TkImage("Save", r"images/Save.png").image,
+            command = self.save
+        ).place(x = 30, y = 145)
 
 
 
@@ -282,7 +291,18 @@ class resistain_app:
         
         plt.show()
     
-
+    def save(self):
+        file = self.dataPath + r"test.csv"
+        header = ["Wavelength", "Intensity"]
+        with open(file, "w+", newline = "\n") as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            i = 0
+            
+            for wl in self.wl_adj[self.startPt:self.stopPt]:
+                row = [wl, self.sp[self.startPt:self.stopPt][i]]
+                writer.writerow(row)
+                i += 1
     #endregion
 
 if __name__ == "__main__":
