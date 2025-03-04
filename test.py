@@ -60,7 +60,16 @@
 
 
 
-test = None
+# test = None
 
-if not test:
-    print('daghsa')
+# if not test:
+#     print('daghsa')
+
+import numpy as np
+
+a = [1,1,1,1,1]
+b = [1,1,1,1,1]
+
+c = np.add(a,b)
+
+print(c)

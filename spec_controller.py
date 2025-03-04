@@ -64,7 +64,7 @@ class oceanoptic_controller():
             print("Ocean optics device not found attempting to find ")
             self.init_spec()
         else:
-            self.wl = self.spec.wavelengths()
+            # self.wl = self.spec.wavelengths()
             self.intens = self.spec.intensities()
 
 

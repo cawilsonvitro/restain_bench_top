@@ -24,12 +24,10 @@ class resistain_app:
         self.model = None
 
         #dark sample
-        self.dark_wl = None
         self.dark_intens = None
         self.dark = False
 
         #light sample
-        self.light_wl = None
         self.light_intens = None
 
         #config storage
@@ -40,6 +38,11 @@ class resistain_app:
         self.light_avg = None
         self.dark_avg = None
         self.boxcar = None
+        self.adjust = None
+
+        #data management
+        self.startPt = None
+        self.stopPt = None
 
     def startApp(self):
         '''
@@ -62,6 +65,7 @@ class resistain_app:
 
         self.quit = True
         self.root.quit()
+        os.close()
     #endregion
 
     #region GUI building
@@ -133,8 +137,10 @@ class resistain_app:
                 "model": "HR2000PLUS",
                 "darkAvgs": "10",
                 "lightAvgs": "10",
-                "BoxCar": "5"  
-                                }
+                "BoxCar": "5",
+                "startPt":"300",
+                "stopPt":"1550"
+                            }
                         }
             with open('config.json','w+') as f:
                 json.dump(default_spec, f)#if file not found creates file with default configs
@@ -149,12 +155,18 @@ class resistain_app:
         self.dark_avg = int(self.spec_config["darkAvgs"])
         self.light_avg = int(self.spec_config["lightAvgs"])
         self.boxcar = int(self.spec_config["BoxCar"])
+        self.adjust = int(self.boxcar/2)
+        self.startPt = int(self.spec_config["startPt"])
+        self.stopPt = int(self.spec_config["stopPt"])
+        
 
 
         try:
             self.spectrometer = oceanoptic_controller(self.integration_time, self.model)
             self.spectrometer.init_spec()
             self.process_display.set("Spectrometer Ready")
+            self.wl = self.spectrometer.spec.wavelengths()
+            self.wl_adj = self.wl[self.adjust:-self.adjust]
         except Exception as e:
             error = "failed: " + str(e)
             self.process_display.set(error)
@@ -182,14 +194,18 @@ class resistain_app:
             self.dark_intens = 0
             while i < self.dark_avg:
                 self.spectrometer.get_spectra()
-                self.dark_wl = self.spectrometer.wl
                 dark_temp = self.spectrometer.intens
-                np.add(self.dark_intens, dark_temp)
+                if i == 0:
+                    self.dark_intens = dark_temp
+                    print(dark_temp)
+                else:
+                    np.add(self.dark_intens, dark_temp)
+                    print(self.dark_intens)
                 i += 1
             
             self.dark_intens_avg = self.dark_intens/self.dark_avg
-            self.dark_intens_avg = np.convolve(self.dark_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
-
+            # self.dark_intens_avg = np.convolve(self.dark_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
+            print(self.dark_intens_avg)
 
 
             StandardLabel(
@@ -199,6 +215,7 @@ class resistain_app:
                     ).place(x = 150, y = 20)
             
             self.process_display.set("dark sample completed")
+            plt.plot(self.wl_adj[self.startPt:self.stopPt],self.dark_intens_avg[self.startPt:self.stopPt])
             self.dark = True
 
         except Exception as e:
@@ -209,7 +226,7 @@ class resistain_app:
             self.root,
             image = TkImage("status_Bad",r"images/Status_Bad.png").image,
                     ).place(x = 150, y = 20)
-            
+            plt.plot
             self.process_display.set(e)
         
     def take_light(self):
@@ -229,7 +246,6 @@ class resistain_app:
                 self.dark_intens = 0
                 while i < self.light_avg:
                     self.spectrometer.get_spectra()
-                    self.light_wl = self.spectrometer.wl
                     light_temp = self.spectrometer.intens
                     np.add(self.dark_intens, light_temp)
                     i += 1
@@ -239,6 +255,8 @@ class resistain_app:
 
                 self.process_display.set("Light Sample taken")
 
+                # ?self.isplay()
+
             except Exception as e:
                 self.process_display.set(e)
             
@@ -247,6 +265,15 @@ class resistain_app:
 
     #region Data handling
 
+    def display(self):
+        self.sp = np.subtract(self.light_intens_avg, self.dark_intens_avg)
+        print(self.wl)
+
+        out_data = np.stack((self.wl_adj, self.dark_intens_avg, self.light_intens_avg, self.sp), axis = 0)
+        print(out_data)
+        out_data = out_data.T
+        
+        plt.plot(self.wl_adj[self.startApp:self.stopPt],self.sp[self.startPt:self.stopPt])
     
 
     #endregion
