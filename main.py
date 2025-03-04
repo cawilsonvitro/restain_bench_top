@@ -220,7 +220,6 @@ class resistain_app:
                     ).place(x = 150, y = 20)
             
             self.process_display.set("dark sample completed")
-            plt.plot(self.wl_adj[self.startPt:self.stopPt],self.dark_intens_avg[self.startPt:self.stopPt])
             self.dark = True
 
         except Exception as e:
@@ -231,7 +230,6 @@ class resistain_app:
             self.root,
             image = TkImage("status_Bad",r"images/Status_Bad.png").image,
                     ).place(x = 150, y = 20)
-            plt.plot
             self.process_display.set(e)
         
     def take_light(self):
@@ -259,8 +257,6 @@ class resistain_app:
                     i += 1
                 
                 self.light_intens_avg = self.light_intens/self.light_avg
-                print(self.light_intens_avg)
-                print(self.light_avg)
                 self.light_intens_avg = np.convolve(self.light_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
 
                 self.process_display.set("Light Sample taken")
@@ -278,15 +274,13 @@ class resistain_app:
 
     def display(self):
         self.sp = np.subtract(self.light_intens_avg, self.dark_intens_avg)
-        # print(self.wl)
 
-        # out_data = np.stack((self.wl_adj, self.dark_intens_avg, self.light_intens_avg, self.sp), axis = 0)
-        # print(out_data)
-        # out_data = out_data.T
+        out_data = np.stack((self.wl_adj, self.dark_intens_avg, self.light_intens_avg, self.sp), axis = 0)
+        out_data = out_data.T
         
-        # plt.plot(self.wl_adj[self.startApp:self.stopPt],self.sp[self.startPt:self.stopPt])
+        plt.plot(self.wl_adj[self.startPt:self.stopPt],self.sp[self.startPt:self.stopPt])
         
-        # plt.show()
+        plt.show()
     
 
     #endregion
