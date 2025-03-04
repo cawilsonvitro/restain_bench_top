@@ -73,3 +73,47 @@ b = [1,1,1,1,1]
 c = np.add(a,b)
 
 print(c)
+
+
+from spec_controller import *
+
+test = oceanoptic_controller(integration=100000, model = "USB2000PLUS")
+
+test.init_spec()
+
+
+test.get_spectra()
+
+a = test.intens
+
+test.get_spectra()
+
+b = test.intens
+
+print(a)
+print(b)
+
+c = np.add(a,b)
+
+print(c)
+
+
+
+
+a = 0
+
+import time 
+
+i = 0
+
+while i < 10:
+    test.get_spectra()
+    if i == 0:
+        a = test.intens
+    else:
+        b = test.intens
+        a = np.add(a,b)
+    print(a[0])
+    i += 1
+    
+print(a)

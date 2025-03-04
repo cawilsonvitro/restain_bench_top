@@ -197,10 +197,8 @@ class resistain_app:
                 dark_temp = self.spectrometer.intens
                 if i == 0:
                     self.dark_intens = dark_temp
-                    print(dark_temp)
                 else:
                     np.add(self.dark_intens, dark_temp)
-                    print(self.dark_intens)
                 i += 1
             
             self.dark_intens_avg = self.dark_intens/self.dark_avg
@@ -243,11 +241,14 @@ class resistain_app:
             try:
                 i = 0
                 light_temp = 0
-                self.dark_intens = 0
+                self.light_intens = 0
                 while i < self.light_avg:
                     self.spectrometer.get_spectra()
-                    light_temp = self.spectrometer.intens
-                    np.add(self.dark_intens, light_temp)
+                    if i == 0:
+                        self.light_intens = self.spectrometer.intens
+                    else:
+                        light_temp = self.spectrometer.intens
+                        np.add(self.light_intens, light_temp)
                     i += 1
                 
                 self.light_intens_avg = self.light_avg/self.light_avg
