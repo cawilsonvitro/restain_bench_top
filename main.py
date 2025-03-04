@@ -1,3 +1,4 @@
+#region Imports
 import tkinter as tk
 from tkinter import Misc
 import tkinter.ttk as ttk
@@ -8,6 +9,8 @@ import os
 import time 
 import numpy as np
 import csv
+from datetime import datetime as dt
+#endregion 
 
 class resistain_app:
 
@@ -267,10 +270,9 @@ class resistain_app:
                 
                 self.light_intens_avg = self.light_intens/self.light_avg
                 self.light_intens_avg = np.convolve(self.light_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
-
+                
                 self.process_display.set("Light Sample taken")
-
-                self.display()
+                self.graph()
 
             except Exception as e:
                 self.process_display.set(e)
@@ -281,28 +283,43 @@ class resistain_app:
 
     #region Data handling
 
-    def display(self):
+    def graph(self):
+        
         self.sp = np.subtract(self.light_intens_avg, self.dark_intens_avg)
 
         out_data = np.stack((self.wl_adj, self.dark_intens_avg, self.light_intens_avg, self.sp), axis = 0)
         out_data = out_data.T
         
-        plt.plot(self.wl_adj[self.startPt:self.stopPt],self.sp[self.startPt:self.stopPt])
+        #getting date and time
         
+        self.dt = dt.now().strftime("%m/%d/%Y, %H:%M:%S")
+        plt.plot(self.wl_adj[self.startPt:self.stopPt],self.sp[self.startPt:self.stopPt])
+        plt.xlabel("Intensity")
+        plt.ylabel("Wavelength")
+        
+        plt.title(self.dt)
         plt.show()
     
     def save(self):
-        file = self.dataPath + r"test.csv"
-        header = ["Wavelength", "Intensity"]
-        with open(file, "w+", newline = "\n") as f:
-            writer = csv.writer(f)
-            writer.writerow(header)
-            i = 0
-            
-            for wl in self.wl_adj[self.startPt:self.stopPt]:
-                row = [wl, self.sp[self.startPt:self.stopPt][i]]
-                writer.writerow(row)
-                i += 1
+        try:
+            self.dt = dt.now().strftime("%m-%d-%Y, Hour %H Min %M Sec %S")
+            file = self.dataPath + self.dt + r".csv"
+            header = ["Wavelength", "Intensity"]
+            with open(file, "w+", newline = "\n") as f:
+                writer = csv.writer(f)
+                writer.writerow(header)
+                i = 0
+                
+                for wl in self.wl_adj[self.startPt:self.stopPt]:
+                    row = [wl, self.sp[self.startPt:self.stopPt][i]]
+                    writer.writerow(row)
+                    i += 1
+        except AttributeError:
+            self.process_display.set("Please take samples first")
+            self.root.update_idletasks()
+        except Exception as e:
+            self.process_display.set(e)
+
     #endregion
 
 if __name__ == "__main__":
