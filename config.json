@@ -1,7 +1,7 @@
 {
     "Spectrometer": {
         "integrationtime": "100000",
-        "model": "HR2000PLUS",
+        "model": "USB2000PLUS",
         "darkAvgs": "10",
         "lightAvgs": "10",
         "BoxCar": "5",
