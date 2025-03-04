@@ -53,19 +53,26 @@ class resistain_app:
         self.root.geometry("480x400")
         self.root.resizable(width=False,height=False)
         self.root.bind("<Escape>", self.endApp)
+        self.root.protocol("WM_DELETE_WINDOW",self.endProto)
         self.process_display = tk.StringVar() 
         self.process_display.set("Booting")
         self.buildGUI(self.root)
         self.root.mainloop()
-
+    
+    def endProto(self):
+        '''
+        wrapper to endApp
+        '''
+        self.endApp(None)
+    
     def endApp(self, event):
         '''
         ends application
         '''
-
         self.quit = True
         self.root.quit()
-        os.close()
+        self.spectrometer.quit()
+        
     #endregion
 
     #region GUI building
@@ -256,7 +263,7 @@ class resistain_app:
 
                 self.process_display.set("Light Sample taken")
 
-                # ?self.isplay()
+                # ?self.display()
 
             except Exception as e:
                 self.process_display.set(e)
@@ -275,6 +282,8 @@ class resistain_app:
         out_data = out_data.T
         
         plt.plot(self.wl_adj[self.startApp:self.stopPt],self.sp[self.startPt:self.stopPt])
+        
+        plt.show()
     
 
     #endregion

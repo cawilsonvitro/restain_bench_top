@@ -74,6 +74,9 @@ class oceanoptic_controller():
             # plt.ylabel("Intensity [a.u.]")
             # plt.grid(True)
             # plt.show()
+            
+    def quit(self):
+        self.spec.close()
 
 # test = oceanoptic_controller(integration = 212000,model='HR2000PLUS')
 
