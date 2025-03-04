@@ -209,8 +209,8 @@ class resistain_app:
                 i += 1
             
             self.dark_intens_avg = self.dark_intens/self.dark_avg
-            # self.dark_intens_avg = np.convolve(self.dark_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
-            print(self.dark_intens_avg)
+            self.dark_intens_avg = np.convolve(self.dark_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
+            # print(self.dark_intens_avg)
 
 
             StandardLabel(
@@ -251,22 +251,25 @@ class resistain_app:
                 self.light_intens = 0
                 while i < self.light_avg:
                     self.spectrometer.get_spectra()
+                    light_temp = self.spectrometer.intens
                     if i == 0:
                         self.light_intens = self.spectrometer.intens
                     else:
-                        light_temp = self.spectrometer.intens
                         np.add(self.light_intens, light_temp)
                     i += 1
                 
-                self.light_intens_avg = self.light_avg/self.light_avg
+                self.light_intens_avg = self.light_intens/self.light_avg
+                print(self.light_intens_avg)
+                print(self.light_avg)
                 self.light_intens_avg = np.convolve(self.light_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
 
                 self.process_display.set("Light Sample taken")
 
-                # ?self.display()
+                self.display()
 
             except Exception as e:
                 self.process_display.set(e)
+                print(e)
             
 
     #endregion
@@ -275,15 +278,15 @@ class resistain_app:
 
     def display(self):
         self.sp = np.subtract(self.light_intens_avg, self.dark_intens_avg)
-        print(self.wl)
+        # print(self.wl)
 
-        out_data = np.stack((self.wl_adj, self.dark_intens_avg, self.light_intens_avg, self.sp), axis = 0)
-        print(out_data)
-        out_data = out_data.T
+        # out_data = np.stack((self.wl_adj, self.dark_intens_avg, self.light_intens_avg, self.sp), axis = 0)
+        # print(out_data)
+        # out_data = out_data.T
         
-        plt.plot(self.wl_adj[self.startApp:self.stopPt],self.sp[self.startPt:self.stopPt])
+        # plt.plot(self.wl_adj[self.startApp:self.stopPt],self.sp[self.startPt:self.stopPt])
         
-        plt.show()
+        # plt.show()
     
 
     #endregion

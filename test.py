@@ -97,7 +97,10 @@ c = np.add(a,b)
 
 print(c)
 
+import matplotlib.pyplot as plt
 
+plt.plot(test.wl,test.intens)
+plt.show()
 
 
 a = 0
@@ -106,14 +109,17 @@ import time
 
 i = 0
 
-while i < 10:
-    test.get_spectra()
-    if i == 0:
-        a = test.intens
-    else:
-        b = test.intens
-        a = np.add(a,b)
-    print(a[0])
-    i += 1
+# while i < 10:
+#     test.get_spectra()
+#     if i == 0:
+#         a = test.intens
+#     else:
+#         b = test.intens
+#         a = np.add(a,b)
+#     print(a[0])
+#     i += 1
     
 print(a)
+
+
+
