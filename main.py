@@ -10,6 +10,7 @@ import time
 import numpy as np
 import csv
 from datetime import datetime as dt
+import matplotlib.pyplot as plt
 #endregion 
 
 class resistain_app:

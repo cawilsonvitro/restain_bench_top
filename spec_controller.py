@@ -1,6 +1,4 @@
 from seabreeze.spectrometers import list_devices, Spectrometer
-
-import matplotlib.pyplot as plt
 import datetime as dt
 from seabreeze.spectrometers import list_devices, Spectrometer
 

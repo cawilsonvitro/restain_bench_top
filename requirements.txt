@@ -1,0 +1,14 @@
+tkinter
+json
+os
+time
+numpy
+csv
+datetime
+matplotlib
+seabreeze
+sys
+PIL
+typing
+__future__
+
