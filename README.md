@@ -5,6 +5,8 @@ use USB2000PLUS or HR2000PLUS
 
 set up.
 
-was made on Python 3.9.13 cannot promise function on other versions of python
+Versions tested on
+ Python 3.9.13 
+Python 3.11.4
 
 to install required libraries run pip install -r requirements.txt
