@@ -187,10 +187,13 @@ class resistain_app:
             self.spectrometer = oceanoptic_controller(self.integration_time, self.model)
             self.spectrometer.init_spec()
             self.spectrometer.get_spectra()
-            self.process_display.set("Spectrometer Ready")
-            self.wl = self.spectrometer.wl
-            self.wl_adj = self.wl[self.adjust:-self.adjust]
-            print(self.wl_adj)
+            print(self.spectrometer.status)
+            if self.spectrometer.status:
+                self.process_display.set("Spectrometer Ready")
+                self.wl = self.spectrometer.wl
+                self.wl_adj = self.wl[self.adjust:-self.adjust]
+            else:
+                self.process_display.set("No Spectrometer found")
         except Exception as e:
             error = "failed: " + str(e)
             self.process_display.set(error)
@@ -313,7 +316,7 @@ class resistain_app:
         try:
             self.dt = dt.now().strftime("%m-%d-%Y, Hour %H Min %M Sec %S")
             file = self.dataPath + self.dt + r".csv"
-            header = ["Wavelength", "Light", "Dark", "Intensity"]
+            header = ["Wavelength", "Light", "Dark", "Normalized"]
             with open(file, "w+", newline = "\n") as f:
                 writer = csv.writer(f)
                 writer.writerow(header)
