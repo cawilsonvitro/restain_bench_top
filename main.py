@@ -42,6 +42,8 @@ class resistain_app:
         #avgs 
         self.light_avg = None
         self.dark_avg = None
+        self.dark_intens_avg = None
+        self.light_intens = None
         self.boxcar = None
         self.adjust = None
 
@@ -187,7 +189,6 @@ class resistain_app:
             self.spectrometer.get_spectra()
             self.process_display.set("Spectrometer Ready")
             self.wl = self.spectrometer.wl
-            print(self.wl)
             self.wl_adj = self.wl[self.adjust:-self.adjust]
             print(self.wl_adj)
         except Exception as e:
@@ -218,16 +219,16 @@ class resistain_app:
             while i < self.dark_avg:
                 self.spectrometer.get_spectra()
                 dark_temp = self.spectrometer.intens
-                if i == 0:
-                    self.dark_intens = dark_temp
-                else:
-                    np.add(self.dark_intens, dark_temp)
+                self.dark_intens = np.add(self.dark_intens, dark_temp)
+                # if i == 0:
+                #     self.dark_intens = dark_temp
+                # else:
+                #     self.dark_intens= np.add(self.dark_intens, dark_temp)
+                print(i)
                 i += 1
             
             self.dark_intens_avg = self.dark_intens/self.dark_avg
             self.dark_intens_avg = np.convolve(self.dark_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
-            # print(self.dark_intens_avg)
-
 
             StandardLabel(
             "Dark_Room_Status",
@@ -266,15 +267,18 @@ class resistain_app:
                 while i < self.light_avg:
                     self.spectrometer.get_spectra()
                     light_temp = self.spectrometer.intens
-                    if i == 0:
-                        self.light_intens = self.spectrometer.intens
-                    else:
-                        np.add(self.light_intens, light_temp)
+                    self.light_intens = np.add(self.light_intens, light_temp)
+                    # if i == 0:
+                    #     self.light_intens = self.spectrometer.intens
+                    # else:
+                    #    self.light_intens = np.add(self.light_intens, light_temp)
+                    print(self.light_intens[1],light_temp[1])
                     i += 1
                 
                 self.light_intens_avg = self.light_intens/self.light_avg
+                print(self.light_intens_avg[1])
                 self.light_intens_avg = np.convolve(self.light_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
-                
+                print(self.light_intens_avg[1])
                 self.process_display.set("Light Sample taken")
                 self.graph()
 
@@ -288,8 +292,9 @@ class resistain_app:
     #region Data handling
 
     def graph(self):
-        
+        print(self.light_intens_avg[self.startPt],self.dark_intens_avg[self.startPt])
         self.sp = np.subtract(self.light_intens_avg, self.dark_intens_avg)
+        print(self.sp[self.startPt])
 
        # out_data = np.stack((self.wl_adj, self.dark_intens_avg, self.light_intens_avg, self.sp), axis = 0)
         #out_data = out_data.T
@@ -297,7 +302,6 @@ class resistain_app:
         #getting date and time
         
         self.dt = dt.now().strftime("%m/%d/%Y, %H:%M:%S")
-        print(self.wl_adj)
         plt.plot(self.wl_adj[self.startPt:self.stopPt],self.sp[self.startPt:self.stopPt])
         plt.ylabel("Intensity")
         plt.xlabel("Wavelength")
@@ -309,14 +313,17 @@ class resistain_app:
         try:
             self.dt = dt.now().strftime("%m-%d-%Y, Hour %H Min %M Sec %S")
             file = self.dataPath + self.dt + r".csv"
-            header = ["Wavelength", "Intensity"]
+            header = ["Wavelength", "Light", "Dark", "Intensity"]
             with open(file, "w+", newline = "\n") as f:
                 writer = csv.writer(f)
                 writer.writerow(header)
                 i = 0
                 
-                for wl in self.wl_adj[self.startPt:self.stopPt]:
-                    row = [wl, self.sp[self.startPt:self.stopPt][i]]
+                for wl in self.wl_adj:
+                    row = [wl, 
+                            self.light_intens_avg[i],
+                            self.dark_intens_avg[i],  
+                            self.sp[i]]
                     writer.writerow(row)
                     i += 1
         except AttributeError:
