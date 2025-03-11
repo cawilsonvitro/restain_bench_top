@@ -184,9 +184,12 @@ class resistain_app:
         try:
             self.spectrometer = oceanoptic_controller(self.integration_time, self.model)
             self.spectrometer.init_spec()
+            self.spectrometer.get_spectra()
             self.process_display.set("Spectrometer Ready")
-            self.wl = self.spectrometer.spec.wavelengths()
+            self.wl = self.spectrometer.wl
+            print(self.wl)
             self.wl_adj = self.wl[self.adjust:-self.adjust]
+            print(self.wl_adj)
         except Exception as e:
             error = "failed: " + str(e)
             self.process_display.set(error)
@@ -288,15 +291,16 @@ class resistain_app:
         
         self.sp = np.subtract(self.light_intens_avg, self.dark_intens_avg)
 
-        out_data = np.stack((self.wl_adj, self.dark_intens_avg, self.light_intens_avg, self.sp), axis = 0)
-        out_data = out_data.T
+       # out_data = np.stack((self.wl_adj, self.dark_intens_avg, self.light_intens_avg, self.sp), axis = 0)
+        #out_data = out_data.T
         
         #getting date and time
         
         self.dt = dt.now().strftime("%m/%d/%Y, %H:%M:%S")
+        print(self.wl_adj)
         plt.plot(self.wl_adj[self.startPt:self.stopPt],self.sp[self.startPt:self.stopPt])
-        plt.xlabel("Intensity")
-        plt.ylabel("Wavelength")
+        plt.ylabel("Intensity")
+        plt.xlabel("Wavelength")
         
         plt.title(self.dt)
         plt.show()
