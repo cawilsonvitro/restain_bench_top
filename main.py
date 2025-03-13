@@ -51,6 +51,8 @@ class resistain_app:
         self.startPt = None
         self.stopPt = None
         self.dataPath = r"data/"
+        self.sample_num = 1
+        self.exst = ".csv"
 
     def startApp(self):
         '''
@@ -304,18 +306,41 @@ class resistain_app:
         
         #getting date and time
         
-        self.dt = dt.now().strftime("%m/%d/%Y, %H:%M:%S")
+        self.date = dt.now().strftime("%m/%d/%Y, %H:%M:%S")
         plt.plot(self.wl_adj[self.startPt:self.stopPt],self.sp[self.startPt:self.stopPt])
         plt.ylabel("Intensity")
         plt.xlabel("Wavelength")
         
-        plt.title(self.dt)
+        plt.title(self.date)
         plt.show()
     
+    def get_sample_num(self):
+        files = os.listdir(self.dataPath)
+        paths = [os.path.join(self.dataPath, basename) for basename in files]
+        last_file = max(paths, key=os.path.getctime)
+        self.exst = ".csv"
+
+        last_file = last_file[:last_file.find(self.exst)]
+
+        self.date = dt.now().strftime("%m-%d-%Y, Hour %H Min %M Sec %S")
+        day = self.date[:self.date.find(",")]
+
+        if last_file.find(day) != -1:
+            self.sample_num = str(int(last_file[-1]) + 1)
+            
+    
+
     def save(self):
         try:
-            self.dt = dt.now().strftime("%m-%d-%Y, Hour %H Min %M Sec %S")
-            file = self.dataPath + self.dt + r".csv"
+            
+            
+            self.get_sample_num()
+            
+            file = self.dataPath + self.date + " " + "sample" + self.sample_num + r".csv"
+
+
+
+
             header = ["Wavelength", "Light", "Dark", "Normalized"]
             with open(file, "w+", newline = "\n") as f:
                 writer = csv.writer(f)
@@ -329,6 +354,8 @@ class resistain_app:
                             self.sp[i]]
                     writer.writerow(row)
                     i += 1
+            display = "data saved to : " + file
+            self.process_display.set(file)
         except AttributeError:
             self.process_display.set("Please take samples first")
             self.root.update_idletasks()
@@ -341,3 +368,5 @@ if __name__ == "__main__":
     temp = resistain_app()
 
     temp.startApp()
+
+    #sample 1 2 etc

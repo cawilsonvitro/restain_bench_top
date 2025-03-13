@@ -9,4 +9,4 @@ Versions tested on
  Python 3.9.13 
 Python 3.11.4
 
-to install required libraries run pip install -r requirements.txt
+to install required libraries run install script
