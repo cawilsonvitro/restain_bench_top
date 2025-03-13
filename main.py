@@ -189,7 +189,6 @@ class resistain_app:
             self.spectrometer = oceanoptic_controller(self.integration_time, self.model)
             self.spectrometer.init_spec()
             self.spectrometer.get_spectra()
-            print(self.spectrometer.status)
             if self.spectrometer.status:
                 self.process_display.set("Spectrometer Ready")
                 self.wl = self.spectrometer.wl
@@ -225,11 +224,6 @@ class resistain_app:
                 self.spectrometer.get_spectra()
                 dark_temp = self.spectrometer.intens
                 self.dark_intens = np.add(self.dark_intens, dark_temp)
-                # if i == 0:
-                #     self.dark_intens = dark_temp
-                # else:
-                #     self.dark_intens= np.add(self.dark_intens, dark_temp)
-                print(i)
                 i += 1
             
             self.dark_intens_avg = self.dark_intens/self.dark_avg
@@ -273,23 +267,15 @@ class resistain_app:
                     self.spectrometer.get_spectra()
                     light_temp = self.spectrometer.intens
                     self.light_intens = np.add(self.light_intens, light_temp)
-                    # if i == 0:
-                    #     self.light_intens = self.spectrometer.intens
-                    # else:
-                    #    self.light_intens = np.add(self.light_intens, light_temp)
-                    print(self.light_intens[1],light_temp[1])
                     i += 1
                 
                 self.light_intens_avg = self.light_intens/self.light_avg
-                print(self.light_intens_avg[1])
                 self.light_intens_avg = np.convolve(self.light_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
-                print(self.light_intens_avg[1])
                 self.process_display.set("Light Sample taken")
                 self.graph()
 
             except Exception as e:
                 self.process_display.set(e)
-                print(e)
             
 
     #endregion
@@ -297,12 +283,8 @@ class resistain_app:
     #region Data handling
 
     def graph(self):
-        print(self.light_intens_avg[self.startPt],self.dark_intens_avg[self.startPt])
         self.sp = np.subtract(self.light_intens_avg, self.dark_intens_avg)
-        print(self.sp[self.startPt])
 
-       # out_data = np.stack((self.wl_adj, self.dark_intens_avg, self.light_intens_avg, self.sp), axis = 0)
-        #out_data = out_data.T
         
         #getting date and time
         
@@ -368,5 +350,3 @@ if __name__ == "__main__":
     temp = resistain_app()
 
     temp.startApp()
-
-    #sample 1 2 etc
