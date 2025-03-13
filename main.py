@@ -317,14 +317,14 @@ class resistain_app:
             
             
             self.get_sample_num()
-            
-            file = self.dataPath + self.date + " " + "sample" + self.sample_num + r".csv"
+            file = self.date + " " + "sample " + self.sample_num + r".csv"
+            filepath = self.dataPath + file
 
 
 
 
             header = ["Wavelength", "Light", "Dark", "Normalized"]
-            with open(file, "w+", newline = "\n") as f:
+            with open(filepath, "w+", newline = "\n") as f:
                 writer = csv.writer(f)
                 writer.writerow(header)
                 i = 0
@@ -336,8 +336,8 @@ class resistain_app:
                             self.sp[i]]
                     writer.writerow(row)
                     i += 1
-            display = "data saved to : " + file
-            self.process_display.set(file)
+            display = "data saved to : " + filepath
+            self.process_display.set(display)
         except AttributeError:
             self.process_display.set("Please take samples first")
             self.root.update_idletasks()
