@@ -44,15 +44,21 @@ class oceanoptic_controller():
             # self.spec.integration_time_micros(self.integration_time)
             # self.status = True
             i = 0
+            found = False
             for device in devices:
                 if device.model == self.model:
+                    found = True
                     break
                 i += 1
-            
-     
-            self.spec = Spectrometer.from_serial_number(devices[i].serial_number)
-            self.spec.integration_time_micros(self.integration_time)
-            self.status = True            
+            if found != False:
+                self.spec = Spectrometer.from_serial_number(devices[i].serial_number)
+                self.spec.integration_time_micros(self.integration_time)
+                self.status = True
+            else:
+                print("wrong spectrometer name found please select from below list and add to the model section in config.json")
+                for device in devices:
+                    print(device.model)
+                self.status = False
         return 
 
 
@@ -74,9 +80,9 @@ class oceanoptic_controller():
         self.spec.close()
         
 
-# test = oceanoptic_controller(integration = 212000,model='HR2000PLUS')
+test = oceanoptic_controller(integration = 212000,model='HR2000PLUS')
 
 
-# test.init_spec()
+test.init_spec()
 
-# # test.get_spectra()
+# test.get_spectra()
