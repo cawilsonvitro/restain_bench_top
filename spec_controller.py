@@ -57,24 +57,22 @@ class oceanoptic_controller():
 
 
     def get_spectra(self):
-        
-        if not self.status:
-            print("Ocean optics device not found attempting to find ")
-            self.init_spec()
-        else:
-            self.wl = self.spec.wavelengths()
-            self.intens = self.spec.intensities()
+        try:
+            if not self.status:
+                print("Ocean optics device not found attempting to find ")
+                self.init_spec()
+            else:
+                self.wl = self.spec.wavelengths()
+                self.intens = self.spec.intensities()
+        except:
+            self.status = False
 
 
-            # plt.title(" reflection")
-            # plt.plot(self.wl, self.intens)
-            # plt.xlabel("Wavelength [nm]")
-            # plt.ylabel("Intensity [a.u.]")
-            # plt.grid(True)
-            # plt.show()
+
             
     def quit(self):
         self.spec.close()
+        
 
 # test = oceanoptic_controller(integration = 212000,model='HR2000PLUS')
 

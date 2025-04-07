@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import Misc
 import tkinter.ttk as ttk
 from spec_controller import *
+from led_controller import *
 from gui import *
 import json
 import os
@@ -11,6 +12,9 @@ import numpy as np
 import csv
 from datetime import datetime as dt
 import matplotlib.pyplot as plt
+
+
+
 #endregion 
 
 class resistain_app:
@@ -27,6 +31,10 @@ class resistain_app:
         self.spectrometer = None
         self.integration_time = None
         self.model = None
+
+        #led 
+        self.led_driver = None
+        self.current = 2
 
         #dark sample
         self.dark_intens = None
@@ -82,6 +90,7 @@ class resistain_app:
         self.quit = True
         self.root.quit()
         self.spectrometer.quit()
+        self.led_driver.quit()
         
     #endregion
 
@@ -198,84 +207,106 @@ class resistain_app:
         except Exception as e:
             error = "failed: " + str(e)
             self.process_display.set(error)
-            
+        
+        finally:
+            self.load_led()
 
 
 
     
     #endregion
 
+    #region led init
+    def load_led(self):
+        self.process_display.set("Loading LED Controller")
+        self.root.update_idletasks()
+        self.led_driver = dc2200()
+        self.led_driver.init_driver()
+
+        if self.led_driver.status: self.process_display.set("LED loaded")
+        else: 
+            self.process_display.set(self.led_driver.C_error)
+
+    #endregion 
+
     #region Spectro usage
 
-
+#need to add led control and error handling.
 
     def take_dark(self):
         '''
         takes dark sample to normalize against
         '''
-        self.process_display.set("taking dark room sample")
-        self.root.update_idletasks()
-        self.dark = False
-        try:
-            i = 0 
-            dark_temp = 0
-            self.dark_intens = 0
-            while i < self.dark_avg:
-                self.spectrometer.get_spectra()
-                dark_temp = self.spectrometer.intens
-                self.dark_intens = np.add(self.dark_intens, dark_temp)
-                i += 1
-            
-            self.dark_intens_avg = self.dark_intens/self.dark_avg
-            self.dark_intens_avg = np.convolve(self.dark_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
+        if self.status_check():
+            self.process_display.set("taking dark room sample")
+            self.root.update_idletasks()
+            self.dark = False
+            #turning off led
+            self.led_driver.off()
 
-            StandardLabel(
-            "Dark_Room_Status",
-            self.root,
-            image = TkImage("status_Bad",r"images/Status_Good.png").image,
-                    ).place(x = 150, y = 20)
-            
-            self.process_display.set("dark sample completed")
-            self.dark = True
+            try:
+                i = 0 
+                dark_temp = 0
+                self.dark_intens = 0
+                while i < self.dark_avg:
+                    self.spectrometer.get_spectra()
+                    dark_temp = self.spectrometer.intens
+                    self.dark_intens = np.add(self.dark_intens, dark_temp)
+                    i += 1
+                
+                self.dark_intens_avg = self.dark_intens/self.dark_avg
+                self.dark_intens_avg = np.convolve(self.dark_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
 
-        except Exception as e:
-            
-            
-            StandardLabel(
-            "Dark_Room_Status",
-            self.root,
-            image = TkImage("status_Bad",r"images/Status_Bad.png").image,
-                    ).place(x = 150, y = 20)
-            self.process_display.set(e)
+                StandardLabel(
+                "Dark_Room_Status",
+                self.root,
+                image = TkImage("status_Bad",r"images/Status_Good.png").image,
+                        ).place(x = 150, y = 20)
+                
+                self.process_display.set("dark sample completed")
+                self.dark = True
+
+            except Exception as e:
+                StandardLabel(
+                "Dark_Room_Status",
+                self.root,
+                image = TkImage("status_Bad",r"images/Status_Bad.png").image,
+                        ).place(x = 150, y = 20)
+                self.process_display.set(e)
         
     def take_light(self):
         '''
         takes light sample
         '''
 
-        if not self.dark:
-            self.process_display.set(" Please take dark sample first")
-        else:
-            self.process_display.set("taking light sample")
-            self.root.update_idletasks()
-            
-            try:
-                i = 0
-                light_temp = 0
-                self.light_intens = 0
-                while i < self.light_avg:
-                    self.spectrometer.get_spectra()
-                    light_temp = self.spectrometer.intens
-                    self.light_intens = np.add(self.light_intens, light_temp)
-                    i += 1
+        if self.status_check:
+            self.led_driver.on(self.current)
+            if not self.dark:
+                self.process_display.set(" Please take dark sample first")
+            else:
+                self.process_display.set("taking light sample")
+                self.root.update_idletasks()
                 
-                self.light_intens_avg = self.light_intens/self.light_avg
-                self.light_intens_avg = np.convolve(self.light_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
-                self.process_display.set("Light Sample taken")
-                self.graph()
+                try:
+                    i = 0
+                    light_temp = 0
+                    self.light_intens = 0
+                    while i < self.light_avg:
+                        self.spectrometer.get_spectra()
+                        light_temp = self.spectrometer.intens
+                        self.light_intens = np.add(self.light_intens, light_temp)
+                        i += 1
+                    
+                    self.light_intens_avg = self.light_intens/self.light_avg
+                    self.light_intens_avg = np.convolve(self.light_intens_avg, np.ones(self.boxcar), 'valid')/self.boxcar
+                    self.process_display.set("Light Sample taken")
+                    self.led_driver.off()
+                    self.graph()
 
-            except Exception as e:
-                self.process_display.set(e)
+                except Exception as e:
+                    self.led_driver.off()
+                    self.process_display.set(e)
+                    
             
 
     #endregion
@@ -343,6 +374,18 @@ class resistain_app:
             self.root.update_idletasks()
         except Exception as e:
             self.process_display.set(e)
+
+    #endregion
+
+    #region error handling
+    def status_check(self):
+        if self.spectrometer.status and self.led_driver.status:
+            return True
+        else:
+            if not self.spectrometer.status:
+                self.load_spec()
+            if not self.led_driver.status:
+                self.load_led()
 
     #endregion
 
