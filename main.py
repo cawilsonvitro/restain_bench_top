@@ -2,8 +2,8 @@
 import tkinter as tk
 from tkinter import Misc
 import tkinter.ttk as ttk
-from spec_controller import *
-from led_controller import *
+import spec_controller as sc
+import led_controller_dummy as lc
 from gui import *
 import json
 import os
@@ -195,7 +195,7 @@ class resistain_app:
 
 
         try:
-            self.spectrometer = oceanoptic_controller(self.integration_time, self.model)
+            self.spectrometer = sc.oceanoptic_controller(self.integration_time, self.model)
             self.spectrometer.init_spec()
             self.spectrometer.get_spectra()
             if self.spectrometer.status:
@@ -220,7 +220,7 @@ class resistain_app:
     def load_led(self):
         self.process_display.set("Loading LED Controller")
         self.root.update_idletasks()
-        self.led_driver = dc2200()
+        self.led_driver = lc.dc2200()
         self.led_driver.init_driver()
 
         if self.led_driver.status: self.process_display.set("LED loaded")
@@ -243,7 +243,7 @@ class resistain_app:
             self.dark = False
             #turning off led
             self.led_driver.off()
-
+            print("I ran")
             try:
                 i = 0 
                 dark_temp = 0
