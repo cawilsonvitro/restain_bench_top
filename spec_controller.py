@@ -26,7 +26,6 @@ class oceanoptic_controller():
         return
     
     def init_spec(self):
-        print('uhhh')
         '''
         loads the dll to the controller and initializes the dll using model name to find correct ocean optics spectr.
 

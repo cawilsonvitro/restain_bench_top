@@ -328,18 +328,30 @@ class resistain_app:
         plt.show()
     
     def get_sample_num(self):
-        files = os.listdir(self.dataPath)
-        paths = [os.path.join(self.dataPath, basename) for basename in files]
-        last_file = max(paths, key=os.path.getctime)
-        self.exst = ".csv"
-
-        last_file = last_file[:last_file.find(self.exst)]
-
         self.date = dt.now().strftime("%m-%d-%Y, Hour %H Min %M Sec %S")
         day = self.date[:self.date.find(",")]
+        self.exst = ".csv"
 
-        if last_file.find(day) != -1:
-            self.sample_num = str(int(last_file[-1]) + 1)
+        files = os.listdir(self.dataPath)
+        paths = [os.path.join(self.dataPath, basename) for basename in files]
+        print(paths)
+        if len(paths) != 0: #if there are any files present
+            last_file = max(paths, key=os.path.getctime)
+            last_file = last_file[:last_file.find(self.exst)]
+
+            if last_file.find(day) != -1: #if the last file is from today
+                self.sample_num = str(int(last_file[-1]) + 1)
+            else:
+                self.sample_num = "1"
+        else:
+            self.sample_num = "1"
+        
+
+        
+
+
+
+
             
     
 

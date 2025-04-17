@@ -171,4 +171,4 @@ cython_debug/
 .pypirc
 
 #all data change to upload data
-.csv
+*.csv
