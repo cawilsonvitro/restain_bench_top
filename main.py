@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import Misc
 import tkinter.ttk as ttk
 from spec_controller import *
-from led_controller import *
+from led_controller_dummy import *
 from gui import *
 import json
 import os
@@ -195,7 +195,7 @@ class resistain_app:
 
 
         try:
-            self.spectrometer = oceanoptic_controller(self.integration_time, self.model)
+            self.spectrometer = oceanoptic_controller(self.integration_time, model =  self.model)
             self.spectrometer.init_spec()
             self.spectrometer.get_spectra()
             if self.spectrometer.status:
