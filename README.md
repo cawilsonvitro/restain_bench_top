@@ -67,4 +67,3 @@ The get_spectra method retrieves spectral data from the spectrometer. If the dev
 Finally, the quit method closes the connection to the spectrometer, releasing any resources held by the device. This is important for ensuring that the hardware is properly released and can be accessed by other processes or future runs of the program.
 
 Overall, this class abstracts away the low-level details of device management, providing a simple and reusable interface for spectrometer operations in Python.
-1
